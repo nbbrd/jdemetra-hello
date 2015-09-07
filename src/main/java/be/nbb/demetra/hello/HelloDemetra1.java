@@ -22,6 +22,7 @@ import ec.tstoolkit.timeseries.simplets.TsPeriod;
 
 /**
  * This example shows how to create and print a time series.
+ * It also shows how to access and modify individual observations of the time series
  *
  * @author Philippe Charles
  */
@@ -31,13 +32,23 @@ public class HelloDemetra1 {
         // 1. Create a starting period (frequency + year + position in year)
         TsPeriod firstPeriod = new TsPeriod(TsFrequency.Monthly, 1990, 0);
 
-        // 2. Create the values
-        double[] values = {59.6, 56.6, 64.5, 58.7, 57.3};
+        // 2. Create the values. Missing values are identified by Double.NaN
+        double[] values = {59.6, 56.6, 64.5, 58.7, Double.NaN, 57.3};
 
         // 3. Create a time series with the period and the values
         TsData data = new TsData(firstPeriod, values, false);
+        // 3bis. We could also create the series directly. The last parameter indicates 
+        // that the time series contains a copy of the data (and not the original data.
+        TsData data_bis=new TsData(TsFrequency.Monthly, 1990, 0, values, true);
 
         // 4. Print the time series
         System.out.println(data);
+        
+        // 5. Data can be accessed and modified using their positions (0-based).
+        System.out.println(data.get(0));
+        data.set(1, 100);
+        System.out.println(data);
+        System.out.println(data_bis);
+        
     }
 }
