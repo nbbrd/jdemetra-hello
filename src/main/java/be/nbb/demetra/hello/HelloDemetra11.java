@@ -18,15 +18,58 @@
  */
 package be.nbb.demetra.hello;
 
+import ec.satoolkit.algorithm.implementation.X13ProcessingFactory;
+import ec.satoolkit.x13.X13Specification;
+import ec.tstoolkit.algorithm.IProcResults;
+import ec.tstoolkit.information.StatisticalTest;
+import ec.tstoolkit.timeseries.simplets.TsData;
+import ec.tstoolkit.timeseries.simplets.TsDataTable;
+
 /**
- * This example shows how to create a time series by means of a TsDataCollector.
- * The frequency of the series can be automatically identified or the data can
- * be automatically aggregated when a frequency is specified.
+ * This example shows how to use the generic interface in X12
  *
  * @author Jean Palate
  */
 public class HelloDemetra11 {
 
     public static void main(String[] args) {
+        // Create/get the ts (for example...)
+        TsData input = Data.P;
+        // Just to store the results (not necessary in other usages)
+        TsDataTable table =new TsDataTable();
+        table.insert(-1, input);
+        // Using a pre-defined specification
+        X13Specification rsa5=X13Specification.RSA5;
+        // Process
+        IProcResults rslts = X13ProcessingFactory.process(input, rsa5);
+
+        TsData sa = rslts.getData("sa", TsData.class);
+        table.insert(-1, sa);
+        TsData trend = rslts.getData("t", TsData.class);
+        table.insert(-1, trend);
+        
+        // Create a user defined specification (starting from a copy of RSAfull)         
+        X13Specification mySpec = rsa5.clone();
+        // Very sensitive outliers detection
+        mySpec.getRegArimaSpecification().getOutliers().setDefaultCriticalValue(2.5);
+        // Allow benchmarking
+        mySpec.getBenchmarkingSpecification().setEnabled(true);
+        // Process
+        IProcResults myrslts = X13ProcessingFactory.process(input, mySpec);
+
+        TsData mysa = myrslts.getData("sa", TsData.class);
+        table.insert(-1, mysa);
+        TsData mytrend = myrslts.getData("t", TsData.class);
+        table.insert(-1, mytrend);
+//        System.out.println(sa);
+        TsData mybench = myrslts.getData("benchmarking.result", TsData.class);
+        table.insert(-1, mybench);
+
+        StatisticalTest skewness = rslts.getData("residuals.skewness", StatisticalTest.class);
+        System.out.println(skewness.pvalue);
+        StatisticalTest myskewness = myrslts.getData("residuals.skewness", StatisticalTest.class);
+        System.out.println(myskewness.pvalue);
+        System.out.println();
+        System.out.println(table);
     }
 }

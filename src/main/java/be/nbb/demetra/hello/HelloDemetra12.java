@@ -18,15 +18,41 @@
  */
 package be.nbb.demetra.hello;
 
+import ec.satoolkit.algorithm.implementation.TramoSeatsProcessingFactory;
+import ec.satoolkit.seats.SeatsResults;
+import ec.satoolkit.tramoseats.TramoSeatsSpecification;
+import ec.tstoolkit.algorithm.CompositeResults;
+import ec.tstoolkit.modelling.arima.PreprocessingModel;
+import ec.tstoolkit.timeseries.simplets.TsData;
+import ec.tstoolkit.ucarima.UcarimaModel;
+
 /**
- * This example shows how to create a time series by means of a TsDataCollector.
- * The frequency of the series can be automatically identified or the data can
- * be automatically aggregated when a frequency is specified.
+ * This example shows how to use the detailed output of Tramo-Seats.
  *
  * @author Jean Palate
  */
 public class HelloDemetra12 {
 
     public static void main(String[] args) {
+        // Create/get the ts (for example...)
+        TsData input = Data.P;
+        // Using a pre-defined specification
+        TramoSeatsSpecification rsafull=TramoSeatsSpecification.RSAfull;
+        // Process
+        CompositeResults rslts = TramoSeatsProcessingFactory.process(input, rsafull);
+        // Get the output of Seats
+        SeatsResults seats=rslts.get(TramoSeatsProcessingFactory.DECOMPOSITION, SeatsResults.class);
+        // Ucarima decomposition
+        UcarimaModel ucarima = seats.getUcarimaModel();
+        // trend model
+        System.out.println(ucarima.getComponent(0));
+        // complement of the trend (=seasonal + irregular). Computed dynamically (not part of the usual  output)
+        System.out.println(ucarima.getComplement(0));
+        
+        // Get the output of Tramo
+        PreprocessingModel model=rslts.get(TramoSeatsProcessingFactory.PREPROCESSING, PreprocessingModel.class);
+        // compute backcasts (dynamically)
+        TsData backcast = model.backcast(100, false);
+        System.out.println(backcast);
     }
 }
