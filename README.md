@@ -32,5 +32,6 @@ The tutorial includes the following examples:
 * HelloDemetra24: use of UCARIMA models (model-based Hodrick-Prescott)
 * HelloDemetra25: estimation of UCARIMA models (see HelloDemetra24)(**ADVANCED**)
 * HelloDemetra26: canonical decomposition (**ADVANCED**)
+* HelloDemetra27: user-defined regression variables in Tramo-Seats/X12
 
 Be aware that the examples use the current code of the "develop" branch of jdemetra-core
