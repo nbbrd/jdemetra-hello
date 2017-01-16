@@ -19,7 +19,6 @@ package be.nbb.demetra.hello;
 import ec.tstoolkit.data.DataBlock;
 import ec.tstoolkit.data.DescriptiveStatistics;
 import ec.tstoolkit.maths.matrices.Matrix;
-import ec.tstoolkit.stats.LjungBoxTest;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -33,7 +32,7 @@ public class HighFreq2 {
     public static void main(String[] args) throws IOException {
         URL resource = HighFreq2.class.getResource("/uspetroleum.txt");
         Matrix pet=MatrixReader.read(new File(resource.getFile()));
-        DataBlock m = pet.column(3);
+        DataBlock m = pet.column(1);
         m.difference();
         m = m.drop(1, 0);
         LjungBoxTest2 test = new LjungBoxTest2();

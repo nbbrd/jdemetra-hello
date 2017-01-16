@@ -22,6 +22,7 @@ import ec.tstoolkit.arima.estimation.RegArimaEstimation;
 import ec.tstoolkit.arima.estimation.RegArimaModel;
 import ec.tstoolkit.modelling.ComponentType;
 import ec.tstoolkit.modelling.DefaultTransformationType;
+import ec.tstoolkit.modelling.RegStatus;
 import ec.tstoolkit.modelling.Variable;
 import ec.tstoolkit.modelling.arima.ModelDescription;
 import ec.tstoolkit.modelling.arima.PreadjustmentType;
@@ -45,11 +46,11 @@ public class HelloDemetra18 {
         model.setTransformation(DefaultTransformationType.Log,
                 PreadjustmentType.LengthOfPeriod);
         model.setAirline(false);
-        ITsVariable td = GregorianCalendarVariables.
+        GregorianCalendarVariables td = GregorianCalendarVariables.
                 getDefault(TradingDaysType.TradingDays);
         ITsVariable sd = new SeasonalDummies(Data.X.getFrequency());
-        model.getCalendars().add(new Variable(td));
-        model.getUserVariables().add(new Variable(sd, ComponentType.Seasonal));
+        model.addVariable(Variable.calendarVariable(td, RegStatus.Prespecified));
+        model.addVariable(Variable.userVariable(sd, ComponentType.Seasonal, RegStatus.Prespecified));
 
 // Generate the low-level regression model
         RegArimaModel<SarimaModel> regarima = model.buildRegArima();

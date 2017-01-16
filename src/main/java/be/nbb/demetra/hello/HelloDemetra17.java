@@ -23,6 +23,7 @@ import ec.tstoolkit.eco.ConcentratedLikelihood;
 import ec.tstoolkit.maths.matrices.Matrix;
 import ec.tstoolkit.modelling.ComponentType;
 import ec.tstoolkit.modelling.DefaultTransformationType;
+import ec.tstoolkit.modelling.RegStatus;
 import ec.tstoolkit.modelling.Variable;
 import ec.tstoolkit.modelling.arima.ModelDescription;
 import ec.tstoolkit.modelling.arima.PreadjustmentType;
@@ -51,10 +52,10 @@ public class HelloDemetra17 {
         // Use a (0 1 1) (without parameters)
         model.setAirline(false);
         // Add trading days (without leap year) and seasonal dummies
-        ITsVariable td=GregorianCalendarVariables.getDefault(TradingDaysType.TradingDays);
+        GregorianCalendarVariables td=GregorianCalendarVariables.getDefault(TradingDaysType.TradingDays);
         ITsVariable sd= new SeasonalDummies(Data.X.getFrequency());
-        model.getCalendars().add(new Variable(td));
-        model.getUserVariables().add(new Variable(sd, ComponentType.Seasonal));
+        model.addVariable(Variable.calendarVariable(td, RegStatus.Prespecified));
+        model.addVariable(Variable.userVariable(sd, ComponentType.Seasonal, RegStatus.Prespecified));
         // Get the list of the regression variables
         TsVariableList X = model.buildRegressionVariables();
         // Generate the low-level regression model

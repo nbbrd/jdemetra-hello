@@ -16,33 +16,22 @@
  */
 package be.nbb.demetra.hello;
 
-import ec.tstoolkit.data.DataBlock;
-import ec.tstoolkit.data.Periodogram;
 import ec.tstoolkit.maths.matrices.Matrix;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.IOException;
-import java.net.URL;
-
 
 /**
  *
  * @author Jean Palate
  */
-public class HighFreq1 {
+public class MatrixWriter {
     
-    public static void main(String[] args) throws IOException {
-        URL resource = HighFreq1.class.getResource("/births.txt");
-        Matrix MBirth=MatrixReader.read(new File(resource.getFile()));
-        DataBlock m1 = MBirth.column(0);
-        m1.difference();
-        m1.difference(1.0, 7);
-        Periodogram periodogram=new Periodogram(m1.drop(8, 0));
-        double[] p = periodogram.getP();
-        double rad=  periodogram.getIntervalInRadians();
-        for (int i=0; i<p.length; i++){
-            System.out.print(i*rad);
-            System.out.print('\t');
-            System.out.println(p[i]);
+    public static void write(Matrix m, File file) throws FileNotFoundException, IOException {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
+            writer.write(m.toString());
         }
     }
 }

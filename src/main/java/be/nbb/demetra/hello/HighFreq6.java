@@ -16,26 +16,24 @@
  */
 package be.nbb.demetra.hello;
 
-import ec.tstoolkit.arima.ArimaModel;
+import ec.demetra.ssf.dk.DkToolkit;
+import ec.demetra.ssf.implementations.arima.SsfUcarima;
+import ec.demetra.ssf.univariate.SsfData;
 import ec.tstoolkit.arima.estimation.RegArimaEstimation;
 import ec.tstoolkit.arima.estimation.RegArimaModel;
 import ec.tstoolkit.data.DataBlock;
+import ec.tstoolkit.data.DataBlockStorage;
 import ec.tstoolkit.maths.matrices.Matrix;
+import ec.tstoolkit.maths.realfunctions.RealFunction;
 import ec.tstoolkit.sarima.SarimaModel;
 import ec.tstoolkit.sarima.SarimaModelBuilder;
 import ec.tstoolkit.sarima.estimation.GlsSarimaMonitor;
-import ec.tstoolkit.ssf.DiffuseFilteringResults;
-import ec.tstoolkit.ssf.DiffuseSquareRootInitializer;
-import ec.tstoolkit.ssf.Filter;
-import ec.tstoolkit.ssf.FilteringResults;
-import ec.tstoolkit.ssf.Smoother;
-import ec.tstoolkit.ssf.SmoothingResults;
-import ec.tstoolkit.ssf.SsfData;
-import ec.tstoolkit.ssf.ucarima.SsfUcarima;
 import ec.tstoolkit.ucarima.ModelDecomposer;
 import ec.tstoolkit.ucarima.SeasonalSelector;
 import ec.tstoolkit.ucarima.TrendCycleSelector;
 import ec.tstoolkit.ucarima.UcarimaModel;
+import ec.tstoolkit.ucarima.WienerKolmogorovEstimator;
+import ec.tstoolkit.ucarima.WienerKolmogorovEstimators;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -44,16 +42,22 @@ import java.net.URL;
  *
  * @author Jean Palate
  */
-public class HighFreq3 {
+public class HighFreq6 {
 
     public static void main(String[] args) throws IOException {
         int freq = 52;
         // the limit for the current implementation
         TrendCycleSelector tsel = new TrendCycleSelector();
         SeasonalSelector ssel = new SeasonalSelector(freq);
-        URL resource = HighFreq2.class.getResource("/uspetroleum.txt");
-        Matrix pet=MatrixReader.read(new File(resource.getFile()));
-        DataBlock m = pet.column(1);
+        URL resource = HighFreq2.class.getResource("/births.txt");
+        Matrix pet = MatrixReader.read(new File(resource.getFile()));
+        DataBlock m = pet.column(0);
+        DataBlock M = new DataBlock(m.getLength() / 7);
+        DataBlock cur = m.extract(0, 7);
+        for (int i = 0; i < M.getLength(); ++i) {
+            M.set(i, cur.sum());
+            cur.slide(7);
+        }
 
         ModelDecomposer decomposer = new ModelDecomposer();
         decomposer.add(tsel);
@@ -61,7 +65,7 @@ public class HighFreq3 {
         SarimaModel arima = new SarimaModelBuilder().createAirlineModel(freq, -.9, -.4);
         
         GlsSarimaMonitor monitor=new GlsSarimaMonitor();
-        RegArimaModel<SarimaModel> regarima=new RegArimaModel<>(arima, m);
+        RegArimaModel<SarimaModel> regarima=new RegArimaModel<>(arima, M);
         RegArimaEstimation<SarimaModel> estimation = monitor.process(regarima);
         
         UcarimaModel ucm = decomposer.decompose(estimation.model.getArima());
@@ -69,24 +73,22 @@ public class HighFreq3 {
         System.out.println(ucm);
         System.out.println(new DataBlock(ucm.getComponent(1).getMA().getCoefficients()));
         
-        SsfUcarima ssf=new SsfUcarima(ucm);
-        Filter filter=new Filter();
-        DiffuseFilteringResults fr=new DiffuseFilteringResults(true);
-        fr.getFilteredData().setSavingA(true);
-        fr.getVarianceFilter().setSavingP(true);
-        filter.setInitializer(new DiffuseSquareRootInitializer());
-        filter.setSsf(ssf);
-        filter.process(new SsfData(m, null), fr);
-        Smoother smoother=new Smoother();
-        smoother.setCalcVar(false);
-        smoother.setSsf(ssf);
-        SmoothingResults sr=new SmoothingResults();
-        smoother.process(new SsfData(m, null), fr, sr);
-        System.out.println(m);
-        System.out.println(new DataBlock(sr.component(ssf.cmpPos(0))));
-        System.out.println(new DataBlock(sr.component(ssf.cmpPos(1))));
-        System.out.println(new DataBlock(sr.component(ssf.cmpPos(3))));
+        SsfUcarima ssf = SsfUcarima.create(ucm);
+        DataBlockStorage sr2 = DkToolkit.fastSmooth(ssf, new SsfData(M), (pos, a, e)->a.add(0, e));
+
+        Matrix X = new Matrix(M.getLength(), 4);
+        X.column(0).copy(M);
+        for (int i = 0; i < 3; ++i) {
+            X.column(i + 1).copy(sr2.item(ssf.getComponentPosition(i)));
+        }
+        System.out.println(X);
         
+        WienerKolmogorovEstimators wk=new WienerKolmogorovEstimators(ucm);
+        WienerKolmogorovEstimator wke = wk.finalEstimator(1, false);
+        RealFunction sqfn = wke.getFilter().squaredGainFunction();
+        for (int i=0; i<500; ++i){
+            System.out.println(sqfn.apply(i*.0005*2*Math.PI));
+        }
     }
 }
 

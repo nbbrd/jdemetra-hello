@@ -21,6 +21,7 @@ import ec.tstoolkit.maths.linearfilters.BackFilter;
 import ec.tstoolkit.maths.linearfilters.RationalBackFilter;
 import ec.tstoolkit.modelling.arima.ModelDescription;
 import ec.tstoolkit.modelling.arima.ModellingContext;
+import ec.tstoolkit.timeseries.Day;
 import ec.tstoolkit.timeseries.regression.AbstractOutlierVariable;
 import ec.tstoolkit.timeseries.regression.IOutlierFactory;
 import ec.tstoolkit.timeseries.regression.IOutlierVariable;
@@ -76,13 +77,14 @@ public class HelloDemetra21 {
 
 class SwitchOutlier extends AbstractOutlierVariable {
 
-    public SwitchOutlier(TsPeriod p) {
+    public SwitchOutlier(Day p) {
         super(p);
     }
 
     @Override
     public void data(TsPeriod start, DataBlock data) {
-        int pos = getPosition().minus(start);
+        TsPeriod pstart=new TsPeriod(start.getFrequency(), getPosition());
+        int pos = pstart.minus(start);
         data.set(0);
         if (pos >= 0) {
             data.set(pos, 1);
@@ -99,10 +101,7 @@ class SwitchOutlier extends AbstractOutlierVariable {
 
     @Override
     public boolean isSignificant(TsDomain domain) {
-        if (domain.getFrequency() != getPosition().getFrequency()) {
-            return false;
-        }
-        int p = domain.search(getPosition());
+         int p = domain.search(getPosition());
         return p >= 0 && p < domain.getLength() - 1;
     }
 
@@ -111,13 +110,18 @@ class SwitchOutlier extends AbstractOutlierVariable {
         return new FilterRepresentation(new RationalBackFilter(
                 BackFilter.D1, BackFilter.ONE), 0);
     }
+
+    @Override
+    public String getCode() {
+        return "WO";
+    }
 }
 
 ///////////////////////////////
 class SwitchOutlierFactory implements IOutlierFactory {
 
     @Override
-    public SwitchOutlier create(TsPeriod position) {
+    public SwitchOutlier create(Day position) {
         return new SwitchOutlier(position);
     }
 
@@ -129,5 +133,10 @@ class SwitchOutlierFactory implements IOutlierFactory {
     @Override
     public OutlierType getOutlierType() {
         return OutlierType.WO;
+    }
+
+    @Override
+    public String getOutlierCode() {
+        return "WO";
     }
 }
