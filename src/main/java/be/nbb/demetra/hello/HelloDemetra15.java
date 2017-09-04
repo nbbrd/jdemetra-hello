@@ -86,5 +86,16 @@ class JulianEasterVariable extends AbstractSingleTsVariable {
         // Julian Easter (in Gregorian dates falls in April or in May) 
         return domain.getFrequency() == TsFrequency.Monthly || domain.getFrequency() == TsFrequency.QuadriMonthly;
     }
+
+    @Override
+    public String getDescription(TsFrequency context) {
+         return "Julian Easter";
+  }
+
+    @Override
+    public String getName() {
+        return "Julian Easter";
+
+    }
 }
 

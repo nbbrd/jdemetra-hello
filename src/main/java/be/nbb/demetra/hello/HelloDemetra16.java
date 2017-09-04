@@ -14,7 +14,7 @@
  * See the Licence for the specific language governing permissions and 
  * limitations under the Licence.
  */
-/*
+ /*
  */
 package be.nbb.demetra.hello;
 
@@ -34,16 +34,15 @@ import ec.tstoolkit.timeseries.simplets.TsFrequency;
 import java.util.Collections;
 import java.util.List;
 
-
 /**
  * Modifier of regression variable: automatic expansion by means of Tramo
- * 
+ *
  * @author Jean Palate
  */
 public class HelloDemetra16 {
 
     public static void main(String[] args) {
-       TsData x = Data.X;
+        TsData x = Data.X;
         TsDomain xdom = x.getDomain().extend(24, 60);
 
         TsVariableList vars = new TsVariableList();
@@ -95,9 +94,9 @@ class TramoExpander implements ITsModifier {
 
     @Override
     public void data(TsDomain domain, List<DataBlock> data) {
-        data(domain, data,0);
+        data(domain, data, 0);
     }
-    
+
     @Override
     public void data(TsDomain domain, List<DataBlock> data, int start) {
         TsData s = of(var);
@@ -152,4 +151,18 @@ class TramoExpander implements ITsModifier {
         return domain.getFrequency() == var.getDefinitionFrequency();
     }
 
+    @Override
+    public String getDescription(TsFrequency context) {
+        return getDescription();
+    }
+
+    @Override
+    public String getItemDescription(int idx, TsFrequency context) {
+        return getItemDescription(idx);
+    }
+
+    @Override
+    public String getName() {
+        return getDescription()+"/Tramo";
+    }
 }

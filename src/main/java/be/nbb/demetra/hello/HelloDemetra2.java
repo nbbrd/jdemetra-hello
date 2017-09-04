@@ -45,9 +45,12 @@ public class HelloDemetra2 {
             day = day.plus(31 + rnd.nextInt(10));
         }
         // Creates a new time series. The most suitable frequency is automatically choosen
-        TsData s = collector.make(TsFrequency.Undefined, TsAggregationType.None);
-        System.out.println(s);
-
+        TsData ts = collector.make(TsFrequency.Undefined, TsAggregationType.None);
+        
+        double a=2, b=3, c=.01;
+        ts.set(i->a+b*i+c*i*i);
+       System.out.println(ts);
+ 
         // Creates a new quarterly time series. The data in the same quarter are added up. 
         TsData S = collector.make(TsFrequency.Quarterly, TsAggregationType.Sum);
         System.out.println(S);

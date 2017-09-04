@@ -54,5 +54,7 @@ public class HelloDemetra12 {
         // compute backcasts (dynamically)
         TsData backcast = model.backcast(100, false);
         System.out.println(backcast);
-    }
+        TsData forecast = model.forecast(100, false);
+        System.out.println(forecast);
+   }
 }
