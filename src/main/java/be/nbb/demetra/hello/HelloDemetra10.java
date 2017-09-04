@@ -71,5 +71,10 @@ public class HelloDemetra10 {
         System.out.println(myskewness.pvalue);
         System.out.println();
         System.out.println(table);
+        
+        System.out.println("Forecasts");
+        System.out.println(myrslts.getData("fcasts(-5)", TsData.class));
+        System.out.println("Backcasts");
+        System.out.println(myrslts.getData("bcasts(-1)", TsData.class));
     }
 }
