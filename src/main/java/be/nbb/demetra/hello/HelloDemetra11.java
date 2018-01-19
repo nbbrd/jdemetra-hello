@@ -24,6 +24,7 @@ import ec.tstoolkit.algorithm.IProcResults;
 import ec.tstoolkit.information.StatisticalTest;
 import ec.tstoolkit.timeseries.simplets.TsData;
 import ec.tstoolkit.timeseries.simplets.TsDataTable;
+import java.util.Map;
 
 /**
  * This example shows how to use the generic interface in X12
@@ -71,5 +72,8 @@ public class HelloDemetra11 {
         System.out.println(myskewness.pvalue);
         System.out.println();
         System.out.println(table);
+        
+        Map<String, Class> dictionary = myrslts.getDictionary();
+        dictionary.keySet().forEach(x->System.out.println(x));
     }
 }
