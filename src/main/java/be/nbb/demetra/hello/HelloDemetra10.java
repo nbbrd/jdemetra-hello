@@ -39,15 +39,23 @@ public class HelloDemetra10 {
         TsDataTable table =new TsDataTable();
         table.insert(-1, input);
         // Using a pre-defined specification
-        TramoSeatsSpecification rsafull=TramoSeatsSpecification.RSAfull;
-        // Process
+        TramoSeatsSpecification rsafull=TramoSeatsSpecification.RSAfull.clone();
+        // Actual number of forecasts
+        // rsafull.getSeatsSpecification().setPredictionLength(50);
+        // Or number of years
+        rsafull.getSeatsSpecification().setPredictionLength(-4);
+         // Process
         IProcResults rslts = TramoSeatsProcessingFactory.process(input, rsafull);
 
         TsData sa = rslts.getData("sa", TsData.class);
         table.insert(-1, sa);
         TsData trend = rslts.getData("t", TsData.class);
         table.insert(-1, trend);
-        
+         TsData saf = rslts.getData("sa_f", TsData.class);
+        table.insert(-1, saf);
+        TsData trendf = rslts.getData("t_f", TsData.class);
+        table.insert(-1, trendf);
+       
         // Create a user defined specification (starting from a copy of RSAfull)         
         TramoSeatsSpecification mySpec = rsafull.clone();
         // Very sensitive outliers detection
